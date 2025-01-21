@@ -1,20 +1,26 @@
-# Use an official Node.js image as a base image
-FROM node:18-alpine
+FROM python:3.12-slim
 
-# Set working directory inside the container
+# Set environment variable for pip timeout
+ENV PIP_DEFAULT_TIMEOUT=100
+
+# RUN apt-get update && apt-get install -y \
+#     build-essential \
+#     gcc \
+#     libgfortran5
+
+# Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json
-COPY package.json package-lock.json ./
-
 # Install dependencies
-RUN npm install
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt --index-url https://pypi.org/simple
 
-# Copy the rest of the application files
-COPY . .
+# Copy fastapi code
+COPY ./app .
 
-# Expose the Vite dev server port
-EXPOSE 5173
+# Expose backend port
+EXPOSE 8000
 
-# Command to start the Vite development server
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+# Run the app
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
