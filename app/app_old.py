@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 from functools import wraps
 import datetime
-from mime_types import mime_types
+from backend.app.mime_types import mime_types
 from tools.formatting import get_formatted_size, get_parsed_host, get_values_from_form
 from tools.io import is_safe_path, get_styling_path, try_get_config_value
 from tools.requests import response, not_found
