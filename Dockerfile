@@ -1,5 +1,8 @@
 FROM python:3.12-slim
 
+# Set environment variables
+ENV PYTHONPATH="${PYTHONPATH}:/app/app"
+
 # Install required system dependencies
 RUN apt-get update && apt-get install -y \
     libmagic1 file \
