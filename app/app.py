@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Body, Query, Request, BackgroundTasks
+from fastapi import FastAPI, HTTPException, Body, Query, Request, BackgroundTasks, File, UploadFile, Depends
 from fastapi.responses import JSONResponse, Response, StreamingResponse
 from pydantic import BaseModel
 from pathlib import Path
@@ -241,6 +241,33 @@ def read_multiple_files(paths: set[str], background_tasks: BackgroundTasks):
     zbuf.seek(0)
     return StreamingResponse(zbuf, media_type='application/zip', headers={'Content-Disposition': f'attachment; filename={zipname}.zip'})
     
+# [POST] /api/upload
+@app.post("/api/upload")
+async def upload_file(file: UploadFile = File(...)):
+    """
+    Uploads a file.
+
+    Args:
+        file (UploadFile): The uploaded file.
+
+    Returns:
+        dict: Success message and file details.
+    """
+    # Ensure the uploads directory exists
+    upload_dir = ROOT_DIRECTORY
+    upload_dir.mkdir(parents=True, exist_ok=True)
+
+    # Secure file path
+    file_path = upload_dir / file.filename
+
+    try:
+        # Save file to disk
+        with file_path.open("wb") as buffer:
+            buffer.write(await file.read())
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error saving file: {str(e)}")
+
+    return {"message": "File uploaded successfully", "filename": file.filename}
 
 
 # Required to be parsed as a list instead of query parameter
